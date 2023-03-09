@@ -819,7 +819,6 @@ class MONETAccessor:
         latitude = linspace(d1.latitude.min(), d1.latitude.max(), len(d1.y))
         longitude = ones(latitude.shape) * asarray(lon)
         if has_pyresample:
-
             if has_pyresample:
                 d2 = xr.DataArray(
                     ones((len(longitude), len(longitude))),
@@ -976,6 +975,7 @@ class MONETAccessor:
         import cartopy.crs as ccrs
         import matplotlib.pyplot as plt
         import seaborn as sns
+        from cartopy.mpl.geoaxes import GeoAxes
 
         from .plots import _dynamic_fig_size
         from .plots.mapgen import draw_map
@@ -983,7 +983,6 @@ class MONETAccessor:
         if map_kws is None:
             map_kws = {}
 
-        sns.set_context("notebook", font_scale=1.2)
         da = _dataset_to_monet(self._obj)
         da = _monet_to_latlon(da)
         crs_p = ccrs.PlateCarree()
@@ -1000,18 +999,24 @@ class MONETAccessor:
         else:
             transform = kwargs["transform"]
             kwargs.pop("transform", None)
-        if "ax" not in kwargs:
-            ax = draw_map(**map_kws)
-        _set_outline_patch_alpha(ax)
-        if roll_dateline:
-            _ = (
-                da.squeeze()
-                .roll(lon=int(len(da.lon) / 2), roll_coords=True)
-                .plot.imshow(ax=ax, transform=transform, **kwargs)
-            )
-        else:
-            _ = da.squeeze().plot.imshow(ax=ax, transform=transform, **kwargs)
-        plt.tight_layout()
+        with sns.plotting_context("notebook", font_scale=1.2):
+            if "ax" not in kwargs:
+                ax = draw_map(**map_kws)
+            else:
+                ax = kwargs.pop("ax", None)
+                if not isinstance(ax, GeoAxes):
+                    raise TypeError("`ax` should be a Cartopy GeoAxes instance")
+            _set_outline_patch_alpha(ax)
+            if roll_dateline:
+                _ = (
+                    da.squeeze()
+                    .roll(lon=int(len(da.lon) / 2), roll_coords=True)
+                    .plot.imshow(ax=ax, transform=transform, **kwargs)
+                )
+            else:
+                _ = da.squeeze().plot.imshow(ax=ax, transform=transform, **kwargs)
+            plt.tight_layout()
+
         return ax
 
     def quick_map(self, map_kws=None, roll_dateline=False, **kwargs):
@@ -1036,6 +1041,7 @@ class MONETAccessor:
         import cartopy.crs as ccrs
         import matplotlib.pyplot as plt
         import seaborn as sns
+        from cartopy.mpl.geoaxes import GeoAxes
 
         from .plots import _dynamic_fig_size
         from .plots.mapgen import draw_map
@@ -1043,7 +1049,6 @@ class MONETAccessor:
         if map_kws is None:
             map_kws = {}
 
-        sns.set_context("notebook")
         da = _dataset_to_monet(self._obj)
         crs_p = ccrs.PlateCarree()
         if "crs" not in map_kws:
@@ -1055,16 +1060,22 @@ class MONETAccessor:
             figsize = _dynamic_fig_size(da)
             map_kws["figsize"] = figsize
         transform = kwargs.pop("transform", crs_p)
-        if "ax" not in kwargs:
-            ax = draw_map(**map_kws)
-        _set_outline_patch_alpha(ax)
-        if roll_dateline:
-            _ = da.roll(x=int(len(da.x) / 2), roll_coords=True).plot(
-                x="longitude", y="latitude", ax=ax, transform=transform, **kwargs
-            )
-        else:
-            _ = da.plot(x="longitude", y="latitude", ax=ax, transform=transform, **kwargs)
-        plt.tight_layout()
+        with sns.plotting_context("notebook"):
+            if "ax" not in kwargs:
+                ax = draw_map(**map_kws)
+            else:
+                ax = kwargs.pop("ax", None)
+                if not isinstance(ax, GeoAxes):
+                    raise TypeError("`ax` should be a Cartopy GeoAxes instance")
+            _set_outline_patch_alpha(ax)
+            if roll_dateline:
+                _ = da.roll(x=int(len(da.x) / 2), roll_coords=True).plot(
+                    x="longitude", y="latitude", ax=ax, transform=transform, **kwargs
+                )
+            else:
+                _ = da.plot(x="longitude", y="latitude", ax=ax, transform=transform, **kwargs)
+            plt.tight_layout()
+
         return ax
 
     def quick_contourf(self, map_kws=None, roll_dateline=False, **kwargs):
@@ -1089,6 +1100,7 @@ class MONETAccessor:
         import cartopy.crs as ccrs
         import matplotlib.pyplot as plt
         import seaborn as sns
+        from cartopy.mpl.geoaxes import GeoAxes
 
         from monet.plots import _dynamic_fig_size
         from monet.plots.mapgen import draw_map
@@ -1096,8 +1108,10 @@ class MONETAccessor:
         if map_kws is None:
             map_kws = {}
 
-        sns.set_context("notebook")
         da = _dataset_to_monet(self._obj)
+        dlon = da.longitude.diff("x")
+        if not ((dlon >= 0).all() or (dlon <= 0).all()):  # monotonic
+            da["longitude"] = da.longitude % 360  # unwrap longitudes
         crs_p = ccrs.PlateCarree()
         if "crs" not in map_kws:
             map_kws["crs"] = crs_p
@@ -1112,17 +1126,24 @@ class MONETAccessor:
         else:
             transform = kwargs["transform"]
             kwargs.pop("transform", None)
-        if "ax" not in kwargs:
-            ax = draw_map(**map_kws)
-        _set_outline_patch_alpha(ax)
-        if roll_dateline:
-            _ = da.roll(x=int(len(da.x) / 2), roll_coords=True).plot.contourf(
-                x="longitude", y="latitude", ax=ax, transform=transform, **kwargs
-            )
-        else:
-            _ = da.plot.contourf(x="longitude", y="latitude", ax=ax, transform=transform, **kwargs)
+        with sns.plotting_context("notebook"):
+            if "ax" not in kwargs:
+                ax = draw_map(**map_kws)
+            else:
+                ax = kwargs.pop("ax", None)
+                if not isinstance(ax, GeoAxes):
+                    raise TypeError("`ax` should be a Cartopy GeoAxes instance")
+            _set_outline_patch_alpha(ax)
+            if roll_dateline:
+                _ = da.roll(x=int(len(da.x) / 2), roll_coords=True).plot.contourf(
+                    x="longitude", y="latitude", ax=ax, transform=transform, **kwargs
+                )
+            else:
+                _ = da.plot.contourf(
+                    x="longitude", y="latitude", ax=ax, transform=transform, **kwargs
+                )
+            plt.tight_layout()
 
-        plt.tight_layout()
         return ax
 
     def _tight_layout(self):
@@ -1809,7 +1830,6 @@ class MONETAccessorDataset:
         latitude = linspace(d1.latitude.min(), d1.latitude.max(), len(d1.y))
         longitude = ones(latitude.shape) * asarray(lon)
         if has_pyresample:
-
             if has_pyresample:
                 d2 = xr.DataArray(
                     ones((len(longitude), len(longitude))),
