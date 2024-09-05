@@ -6,6 +6,7 @@ import xarray as xr
 from packaging.version import Version
 
 import monet  # noqa: F401
+from monet.plots.mapgen import draw_map
 
 cartopy_version = Version(cartopy.__version__)
 
@@ -34,7 +35,12 @@ def test_quick_with_cartopy_ax(which):
     getattr(da.monet, f"quick_{which}")(ax=ax, transform=tran)
 
 
+def test_draw_map_counties():
+    _ = draw_map(counties=True, extent=[-110.5, -101, 36, 42])
+
+
 if __name__ == "__main__":
     test_quick("map")
+    test_draw_map_counties()
 
     plt.show()
