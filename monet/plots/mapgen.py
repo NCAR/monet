@@ -1,4 +1,5 @@
-""" map utilities """
+"""Map utilities."""
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
@@ -18,30 +19,44 @@ def draw_map(
     return_fig=False,
     **kwargs
 ):
-    """Short summary.
+    """Draw a map with Cartopy.
 
     Parameters
     ----------
-    ax : type
-        Description of parameter `ax` (the default is None).
+    crs : cartopy.crs.Projection
+        The map projection.
+        If set, this takes precedence over the possible ``kwargs['subplot_kw']['projection']``.
+        If unset (``None``), defaults to ``ccrs.PlateCarree()``.
     natural_earth : bool
-        Description of parameter `natural_earth` (the default is True).
+        Add the Cartopy Natural Earth ocean, land, lakes, and rivers features.
     coastlines : bool
-        Description of parameter `coastlines` (the default is True).
+        Add coastlines (`linewidth` applied).
     states : bool
-        Description of parameter `states` (the default is True).
+        Add states/provinces (`linewidth` applied).
+    counties : bool
+        Add US counties (`linewidth` applied).
     countries : bool
-        Description of parameter `countries` (the default is True).
-    state_resolutions : bool
-        Description of parameter `state_resolutions` (the default is '10m').
-    extent : [lon_min,lon_max,lat_min,lat_max]
-        Description of parameter `extent` (the default is None).
+        Add country borders (`linewidth` applied).
+    resolution : {'10m', '50m', '110m'}
+        The resolution of the Natural Earth features for coastlines, states, and counties.
+        The others are set automatically.
+    extent : array-like
+        Set the map extent with ``[lon_min,lon_max,lat_min,lat_max]``.
+    figsize : tuple
+        Figure size (width, height), passed to ``plt.subplots()``.
+    linewidth : float
+        Line width for coastlines, states, counties, and countries.
+    return_fig : bool
+        Return the figure and axes objects.
+        By default (``False``), just the axes object is returned.
+    **kwargs
+        Arguments pass to ``plt.subplots()``.
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    :
+        By default, returns just the ``ax`` (:class:`cartopy.mpl.geoaxes.GeoAxes` instance).
+        If `return_fig` is true, returns ``fig, ax``.
     """
     con2 = "subplot_kw" in kwargs and "projection" not in kwargs["subplot_kw"]
     if kwargs is not None and crs is None:
