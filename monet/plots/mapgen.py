@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 
 def draw_map(
+    *,
     crs=None,
     natural_earth=False,
     coastlines=True,
