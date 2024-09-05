@@ -45,6 +45,7 @@ def draw_map(
         Set the map extent with ``[lon_min,lon_max,lat_min,lat_max]``.
     figsize : tuple
         Figure size (width, height), passed to ``plt.subplots()``.
+        This takes precedence over the possible ``kwargs['figsize']``.
     linewidth : float
         Line width for coastlines, states, counties, and countries.
     return_fig : bool
@@ -59,17 +60,17 @@ def draw_map(
         By default, returns just the ``ax`` (:class:`cartopy.mpl.geoaxes.GeoAxes` instance).
         If `return_fig` is true, returns ``fig, ax``.
     """
-    con2 = "subplot_kw" in kwargs and "projection" not in kwargs["subplot_kw"]
-    if kwargs is not None and crs is None:
-        if "subplot_kw" not in kwargs:
-            kwargs["subplot_kw"] = {"projection": ccrs.PlateCarree()}
-        elif con2:
-            kwargs["subplot_kw"]["projection"] = ccrs.PlateCarree()
-        f, ax = plt.subplots(figsize=figsize, **kwargs)
-    elif crs is not None:
-        f, ax = plt.subplots(figsize=figsize, subplot_kw={"projection": crs})
+    kwargs["figsize"] = figsize
+    if "subplot_kw" not in kwargs:
+        kwargs["subplot_kw"] = {}
+    if crs is not None:
+        kwargs["subplot_kw"]["projection"] = crs
     else:
-        f, ax = plt.subplots(figsize=figsize, subplot_kw={"projection": ccrs.PlateCarree()})
+        if "projection" not in kwargs["subplot_kw"]:
+            kwargs["subplot_kw"]["projection"] = ccrs.PlateCarree()
+
+    fig, ax = plt.subplots(**kwargs)
+
     if natural_earth:
         # ax.stock_img()
         ax.add_feature(cfeature.OCEAN)
@@ -113,6 +114,6 @@ def draw_map(
         ax.set_extent(extent)
 
     if return_fig:
-        return f, ax
+        return fig, ax
     else:
         return ax
