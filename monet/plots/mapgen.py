@@ -72,7 +72,6 @@ def draw_map(
     fig, ax = plt.subplots(**kwargs)
 
     if natural_earth:
-        # ax.stock_img()
         ax.add_feature(cfeature.OCEAN)
         ax.add_feature(cfeature.LAND)
         ax.add_feature(cfeature.LAKES)
