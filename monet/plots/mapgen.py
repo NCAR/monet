@@ -85,7 +85,6 @@ def draw_map(
             scale=resolution,
             facecolor="none",
             edgecolor="k",
-            linewidth=linewidth,
         )
 
     if counties:
@@ -95,7 +94,6 @@ def draw_map(
             scale=resolution,
             facecolor="none",
             edgecolor="k",
-            linewidth=linewidth,
         )
 
     if coastlines:
