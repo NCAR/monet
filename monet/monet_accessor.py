@@ -974,7 +974,7 @@ class MONETAccessor:
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.imshow function
+            kwargs for :meth:`xarray.DataArray.plot.imshow`
 
         Returns
         -------
@@ -1040,7 +1040,7 @@ class MONETAccessor:
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.pcolormesh function
+            kwargs for :meth:`xarray.DataArray.plot.pcolormesh`
 
         Returns
         -------
@@ -1099,7 +1099,7 @@ class MONETAccessor:
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.contourf function
+            kwargs for :meth:`xarray.DataArray.plot.contourf`
 
         Returns
         -------
