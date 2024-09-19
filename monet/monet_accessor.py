@@ -960,10 +960,9 @@ class MONETAccessor:
         return kwargs
 
     def quick_imshow(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``imshow``.
+        """Quickly create a geo-referenced image plot using Cartopy and Matplotlib.
 
-        Note that this should only be used for regular grids.
+        Note that this should only be used for regular grids (e.g. rectangular lat/lon grid).
 
         Parameters
         ----------
@@ -1028,8 +1027,7 @@ class MONETAccessor:
         return ax
 
     def quick_map(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``pcolormesh``.
+        """Quickly create a geo-referenced plot using Cartopy and Matplotlib.
 
         Parameters
         ----------
@@ -1041,6 +1039,7 @@ class MONETAccessor:
             at 0 degrees.
         **kwargs :
             kwargs for :meth:`xarray.DataArray.plot.pcolormesh`
+            (actually passed to :meth:`xarray.DataArray.plot`, but pcolormesh is the usual result)
 
         Returns
         -------
@@ -1087,8 +1086,7 @@ class MONETAccessor:
         return ax
 
     def quick_contourf(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``contourf``.
+        """Quickly create a geo-referenced filled-contour plot using Cartopy and Matplotlib.
 
         Parameters
         ----------
