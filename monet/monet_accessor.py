@@ -967,8 +967,8 @@ class MONETAccessor:
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
             roll_dateline is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
@@ -1033,8 +1033,8 @@ class MONETAccessor:
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
             roll_dateline is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
@@ -1092,8 +1092,8 @@ class MONETAccessor:
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
             roll_dateline is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
