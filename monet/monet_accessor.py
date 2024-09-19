@@ -960,21 +960,20 @@ class MONETAccessor:
         return kwargs
 
     def quick_imshow(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``imshow``.
+        """Quickly create a geo-referenced image plot using Cartopy and Matplotlib.
 
-        Note that this should only be used for regular grids.
+        Note that this should only be used for regular grids (e.g. rectangular lat/lon grid).
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
-            roll_dateline is meant to help with global datasets that the longitudes
+            `roll_dateline` is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.imshow function
+            kwargs for :meth:`xarray.DataArray.plot.imshow`
 
         Returns
         -------
@@ -1028,19 +1027,19 @@ class MONETAccessor:
         return ax
 
     def quick_map(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``pcolormesh``.
+        """Quickly create a geo-referenced plot using Cartopy and Matplotlib.
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
-            roll_dateline is meant to help with global datasets that the longitudes
+            `roll_dateline` is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.pcolormesh function
+            kwargs for :meth:`xarray.DataArray.plot.pcolormesh`
+            (actually passed to :meth:`xarray.DataArray.plot`, but pcolormesh is the usual result)
 
         Returns
         -------
@@ -1087,19 +1086,18 @@ class MONETAccessor:
         return ax
 
     def quick_contourf(self, map_kws=None, roll_dateline=False, **kwargs):
-        """This function takes an xarray DataArray and quickly creates a figure
-        using cartopy and matplotlib ``contourf``.
+        """Quickly create a geo-referenced filled-contour plot using Cartopy and Matplotlib.
 
         Parameters
         ----------
-        map_kws : dictionary
-            kwargs for monet.plots.mapgen.draw_map
+        map_kws : dict
+            kwargs for :func:`monet.plots.mapgen.draw_map`
         roll_dateline : bool
-            roll_dateline is meant to help with global datasets that the longitudes
+            `roll_dateline` is meant to help with global datasets that the longitudes
             range from 0 to 360 instead of -180 to 180.  Otherwise a white line appears
             at 0 degrees.
         **kwargs :
-            kwargs for the xarray.DataArray.plot.contourf function
+            kwargs for :meth:`xarray.DataArray.plot.contourf`
 
         Returns
         -------

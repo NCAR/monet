@@ -44,7 +44,7 @@ def draw_map(
     extent : array-like
         Set the map extent with ``[lon_min,lon_max,lat_min,lat_max]``.
     figsize : tuple
-        Figure size (width, height), passed to ``plt.subplots()``.
+        Figure size (width, height), passed to :func:`plt.subplots() <matplotlib.pyplot.subplots>`.
         This takes precedence over the possible ``kwargs['figsize']``.
     linewidth : float
         Line width for coastlines, states, counties, and countries.
@@ -52,7 +52,7 @@ def draw_map(
         Return the figure and axes objects.
         By default (``False``), just the axes object is returned.
     **kwargs
-        Arguments pass to ``plt.subplots()``.
+        Arguments to pass to :func:`plt.subplots() <matplotlib.pyplot.subplots>`.
 
     Returns
     -------
