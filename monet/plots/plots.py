@@ -1,4 +1,5 @@
 """plotting routines"""
+
 import functools
 
 import matplotlib.pyplot as plt
