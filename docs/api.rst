@@ -13,6 +13,7 @@ API
 
 .. module:: monet
 
+.. currentmodule:: None
 
 Top-level functions
 ~~~~~~~~~~~~~~~~~~~
