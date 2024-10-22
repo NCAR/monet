@@ -23,7 +23,7 @@ dependencies:
   #
   # docs
   - nbsphinx
-  - sphinx=4.*
+  - sphinx=7.*
   - sphinx-autobuild
   - sphinx-autosummary-accessors
   - sphinx_rtd_theme>=0.4
