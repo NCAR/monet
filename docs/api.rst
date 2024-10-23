@@ -13,6 +13,7 @@ API
 
 .. module:: monet
 
+.. py:currentmodule:: None
 
 Top-level functions
 ~~~~~~~~~~~~~~~~~~~
