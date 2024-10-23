@@ -44,7 +44,7 @@ Modules
 DataArray Accessor
 ~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: xarray
+.. py:currentmodule:: xarray
 
 .. autosummary::
    :toctree: api/
@@ -73,7 +73,7 @@ DataArray Accessor
 Dataset Accessor
 ~~~~~~~~~~~~~~~~
 
-.. currentmodule:: xarray
+.. py:currentmodule:: xarray
 
 .. autosummary::
    :toctree: api/
@@ -101,7 +101,7 @@ Dataset Accessor
 DataFrame Accessor
 ~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: pandas
+.. py:currentmodule:: pandas
 
 .. autosummary::
    :toctree: api/
