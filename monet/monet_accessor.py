@@ -67,6 +67,7 @@ def _dataset_to_monet(
     lat_name="latitude",
     lon_name="longitude",
     latlon2d=None,
+    lon180=None,
 ):
     """Rename xarray DataArray or Dataset coordinate variables for use with monet functions,
     returning a new xarray object.
@@ -81,7 +82,12 @@ def _dataset_to_monet(
         Name of the longitude array.
     latlon2d : bool, optional
         Whether the latitude and longitude data is two-dimensional.
-        If unset, guess based on dim count.
+        If unset (``None``), guess based on dim count.
+    lon180 : bool, optional
+        Whether the longitude values are in the range [-180, 180) already.
+        If true, longitude wrapping/normalization,
+        which can introduce small floating point errors, will be skipped.
+        If unset (``None``), compute min/max to determine.
     """
 
     if "grid_xt" in dset.dims:
@@ -120,30 +126,29 @@ def _dataset_to_monet(
         except ValueError:
             print("dset must be an Xarray.DataArray or Xarray.Dataset")
 
-    # Unstructured Grid
-    # lat & lon are not coordinate variables in unstructured grid
-    if dset.attrs.get("mio_has_unstructured_grid", False):
-        # only call rename and wrap_longitudes
-        dset = _rename_to_monet_latlon(dset)
+    dset = _rename_to_monet_latlon(dset)
+
+    if lon180 is None:
+        lon180 = dset["longitude"].min() >= -180 and dset["longitude"].max() < 180
+    if not lon180:
         dset["longitude"] = wrap_longitudes(dset["longitude"])
 
-    else:
-        dset = _rename_to_monet_latlon(dset)
-        if latlon2d is None:
-            latlon2d = dset[lat_name].ndim >= 2
-        if not latlon2d:
-            try:
-                if isinstance(dset, xr.DataArray):
-                    dset = _dataarray_coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
-                elif isinstance(dset, xr.Dataset):
-                    dset = _coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
-                else:
-                    raise ValueError
-            except ValueError:
-                print("dset must be an Xarray.DataArray or Xarray.Dataset")
-        else:
-            dset = _rename_to_monet_latlon(dset)
-        dset["longitude"] = wrap_longitudes(dset["longitude"])
+    # lat & lon are not coordinate variables in unstructured grid, so we're done
+    if dset.attrs.get("mio_has_unstructured_grid", False):
+        return dset
+
+    if latlon2d is None:
+        latlon2d = dset[lat_name].ndim >= 2
+    if not latlon2d:
+        try:
+            if isinstance(dset, xr.DataArray):
+                dset = _dataarray_coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
+            elif isinstance(dset, xr.Dataset):
+                dset = _coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
+            else:
+                raise ValueError
+        except ValueError:
+            print("dset must be an Xarray.DataArray or Xarray.Dataset")
 
     return dset
 
