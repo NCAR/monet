@@ -62,7 +62,13 @@ def _monet_to_latlon(da):
         return dset
 
 
-def _dataset_to_monet(dset, lat_name="latitude", lon_name="longitude", latlon2d=False):
+def _dataset_to_monet(
+    dset,
+    lat_name="latitude",
+    lon_name="longitude",
+    latlon2d=False,
+    inplace=False,
+):
     """Rename xarray DataArray or Dataset coordinate variables for use with monet functions,
     returning a new xarray object.
 
@@ -77,6 +83,9 @@ def _dataset_to_monet(dset, lat_name="latitude", lon_name="longitude", latlon2d=
     latlon2d : bool
         Whether the latitude and longitude data is two-dimensional.
     """
+    if not inplace:
+        dset = dset.copy()
+
     if "grid_xt" in dset.dims:
         # GFS v16 file
         try:
@@ -123,10 +132,7 @@ def _dataset_to_monet(dset, lat_name="latitude", lon_name="longitude", latlon2d=
     else:
         dset = _rename_to_monet_latlon(dset)
         latlon2d = True
-        # print(len(dset[lat_name].shape))
-        # print(dset)
         if len(dset[lat_name].shape) < 2:
-            # print(dset[lat_name].shape)
             latlon2d = False
         if latlon2d is False:
             try:
