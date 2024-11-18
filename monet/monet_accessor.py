@@ -66,7 +66,7 @@ def _dataset_to_monet(
     dset,
     lat_name="latitude",
     lon_name="longitude",
-    latlon2d=False,
+    latlon2d=None,
 ):
     """Rename xarray DataArray or Dataset coordinate variables for use with monet functions,
     returning a new xarray object.
@@ -79,8 +79,9 @@ def _dataset_to_monet(
         Name of the latitude array.
     lon_name : str
         Name of the longitude array.
-    latlon2d : bool
+    latlon2d : bool, optional
         Whether the latitude and longitude data is two-dimensional.
+        If unset, guess based on dim count.
     """
 
     if "grid_xt" in dset.dims:
@@ -128,10 +129,9 @@ def _dataset_to_monet(
 
     else:
         dset = _rename_to_monet_latlon(dset)
-        latlon2d = True
-        if len(dset[lat_name].shape) < 2:
-            latlon2d = False
-        if latlon2d is False:
+        if latlon2d is None:
+            latlon2d = dset[lat_name].ndim >= 2
+        if not latlon2d:
             try:
                 if isinstance(dset, xr.DataArray):
                     dset = _dataarray_coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
