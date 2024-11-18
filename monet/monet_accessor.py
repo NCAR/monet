@@ -67,7 +67,6 @@ def _dataset_to_monet(
     lat_name="latitude",
     lon_name="longitude",
     latlon2d=False,
-    inplace=False,
 ):
     """Rename xarray DataArray or Dataset coordinate variables for use with monet functions,
     returning a new xarray object.
@@ -83,8 +82,6 @@ def _dataset_to_monet(
     latlon2d : bool
         Whether the latitude and longitude data is two-dimensional.
     """
-    if not inplace:
-        dset = dset.copy()
 
     if "grid_xt" in dset.dims:
         # GFS v16 file
@@ -177,7 +174,7 @@ def _rename_to_monet_latlon(ds):
     elif "XLAT" in check_list:
         return ds.rename({"XLAT": "latitude", "XLONG": "longitude"})
     else:
-        return ds
+        return ds.copy()
 
 
 def _coards_to_netcdf(dset, lat_name="lat", lon_name="lon"):
