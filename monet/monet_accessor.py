@@ -126,8 +126,12 @@ def _dataset_to_monet(
         except ValueError:
             print("dset must be an Xarray.DataArray or Xarray.Dataset")
 
-    dset = _rename_to_monet_latlon(dset)
+    # Rename lat/lon coordinates to 'latitude'/'longitude'
+    dset = _rename_to_monet_latlon(dset)  # common cases
+    if not {"latitude", "longitude"} <= set(dset.variables):
+        dset = dset.rename({lat_name: "latitude", lon_name: "longitude"})
 
+    # Maybe wrap longitudes
     if lon180 is None:
         lon180 = dset["longitude"].min() >= -180 and dset["longitude"].max() < 180
     if not lon180:
@@ -137,14 +141,15 @@ def _dataset_to_monet(
     if dset.attrs.get("mio_has_unstructured_grid", False):
         return dset
 
+    # Maybe convert 1-D lat/lon coords to 2-D
     if latlon2d is None:
-        latlon2d = dset[lat_name].ndim >= 2
+        latlon2d = dset["latitude"].ndim >= 2
     if not latlon2d:
         try:
             if isinstance(dset, xr.DataArray):
-                dset = _dataarray_coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
+                dset = _dataarray_coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
             elif isinstance(dset, xr.Dataset):
-                dset = _coards_to_netcdf(dset, lat_name=lat_name, lon_name=lon_name)
+                dset = _coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
             else:
                 raise ValueError
         except ValueError:
