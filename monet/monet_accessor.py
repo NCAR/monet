@@ -89,42 +89,33 @@ def _dataset_to_monet(
         which can introduce small floating point errors, will be skipped.
         If unset (``None``), compute min/max to determine.
     """
+    if not isinstance(dset, (xr.DataArray, xr.Dataset)):
+        raise TypeError("dset must be an xarray.DataArray or xarray.Dataset")
 
-    if "grid_xt" in dset.dims:
-        # GFS v16 file
-        try:
-            if isinstance(dset, xr.DataArray):
-                dset = _dataarray_coards_to_netcdf(dset, lat_name="grid_yt", lon_name="grid_xt")
-            elif isinstance(dset, xr.Dataset):
-                dset = _dataarray_coards_to_netcdf(dset, lat_name="grid_yt", lon_name="grid_xt")
-            else:
-                raise ValueError
-        except ValueError:
-            print("dset must be an xarray.DataArray or xarray.Dataset")
+    if "grid_xt" in dset.dims:  # GFS v16 file
+        if isinstance(dset, xr.DataArray):
+            dset = _dataarray_coards_to_netcdf(dset, lat_name="grid_yt", lon_name="grid_xt")
+        elif isinstance(dset, xr.Dataset):
+            dset = _dataarray_coards_to_netcdf(dset, lat_name="grid_yt", lon_name="grid_xt")
 
     if "south_north" in dset.dims:  # WRF WPS file
         dset = dset.rename(dict(south_north="y", west_east="x"))
-        try:
-            if isinstance(dset, xr.Dataset):
-                if "XLAT_M" in dset.data_vars:
-                    dset["XLAT_M"] = dset.XLAT_M.squeeze()
-                    dset["XLONG_M"] = dset.XLONG_M.squeeze()
-                    dset = dset.set_coords(["XLAT_M", "XLONG_M"])
-                elif "XLAT" in dset.data_vars:
-                    dset["XLAT"] = dset.XLAT.squeeze()
-                    dset["XLONG"] = dset.XLONG.squeeze()
-                    dset = dset.set_coords(["XLAT", "XLONG"])
-            elif isinstance(dset, xr.DataArray):
-                if "XLAT_M" in dset.coords:
-                    dset["XLAT_M"] = dset.XLAT_M.squeeze()
-                    dset["XLONG_M"] = dset.XLONG_M.squeeze()
-                elif "XLAT" in dset.coords:
-                    dset["XLAT"] = dset.XLAT.squeeze()
-                    dset["XLONG"] = dset.XLONG.squeeze()
-            else:
-                raise ValueError
-        except ValueError:
-            print("dset must be an Xarray.DataArray or Xarray.Dataset")
+        if isinstance(dset, xr.Dataset):
+            if "XLAT_M" in dset.data_vars:
+                dset["XLAT_M"] = dset.XLAT_M.squeeze()
+                dset["XLONG_M"] = dset.XLONG_M.squeeze()
+                dset = dset.set_coords(["XLAT_M", "XLONG_M"])
+            elif "XLAT" in dset.data_vars:
+                dset["XLAT"] = dset.XLAT.squeeze()
+                dset["XLONG"] = dset.XLONG.squeeze()
+                dset = dset.set_coords(["XLAT", "XLONG"])
+        elif isinstance(dset, xr.DataArray):
+            if "XLAT_M" in dset.coords:
+                dset["XLAT_M"] = dset.XLAT_M.squeeze()
+                dset["XLONG_M"] = dset.XLONG_M.squeeze()
+            elif "XLAT" in dset.coords:
+                dset["XLAT"] = dset.XLAT.squeeze()
+                dset["XLONG"] = dset.XLONG.squeeze()
 
     # Rename lat/lon coordinates to 'latitude'/'longitude'
     dset = _rename_to_monet_latlon(dset)  # common cases
@@ -145,15 +136,10 @@ def _dataset_to_monet(
     if latlon2d is None:
         latlon2d = dset["latitude"].ndim >= 2
     if not latlon2d:
-        try:
-            if isinstance(dset, xr.DataArray):
-                dset = _dataarray_coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
-            elif isinstance(dset, xr.Dataset):
-                dset = _coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
-            else:
-                raise ValueError
-        except ValueError:
-            print("dset must be an Xarray.DataArray or Xarray.Dataset")
+        if isinstance(dset, xr.DataArray):
+            dset = _dataarray_coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
+        elif isinstance(dset, xr.Dataset):
+            dset = _coards_to_netcdf(dset, lat_name="latitude", lon_name="longitude")
 
     return dset
 
