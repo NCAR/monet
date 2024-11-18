@@ -119,7 +119,9 @@ def _dataset_to_monet(
 
     # Rename lat/lon coordinates to 'latitude'/'longitude'
     dset = _rename_to_monet_latlon(dset)  # common cases
-    if not {"latitude", "longitude"} <= set(dset.variables):
+    if (isinstance(dset, xr.Dataset) and not {"latitude", "longitude"} <= set(dset.variables)) or (
+        isinstance(dset, xr.DataArray) and not {"latitude", "longitude"} <= set(dset.coords)
+    ):
         dset = dset.rename({lat_name: "latitude", lon_name: "longitude"})
 
     # Maybe wrap longitudes
