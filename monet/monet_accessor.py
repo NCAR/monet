@@ -1222,6 +1222,7 @@ class MONETAccessor:
             result = r.get_sample_from_neighbour_info(source_data)
             result.name = source_data.name
             result["latitude"] = target_data.latitude
+            result["longitude"] = target_data.longitude
 
         elif isinstance(source_data, xr.Dataset):
             results = {}
@@ -1544,6 +1545,7 @@ class MONETAccessorDataset:
             result = r.get_sample_from_neighbour_info(source_data)
             result.name = source_data.name
             result["latitude"] = target_data.latitude
+            result["longitude"] = target_data.longitude
 
         elif isinstance(source_data, xr.Dataset):
             results = {}
