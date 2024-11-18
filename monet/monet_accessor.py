@@ -1212,6 +1212,7 @@ class MONETAccessor:
 
         # from .grids import get_generic_projection_from_proj4
         # check to see if grid is supplied
+
         source_data = _dataset_to_monet(data)
         target_data = _dataset_to_monet(self._obj)
         source = self._get_CoordinateDefinition(data=source_data)
@@ -1525,16 +1526,7 @@ class MONETAccessorDataset:
 
         # from .grids import get_generic_projection_from_proj4
         # check to see if grid is supplied
-        try:
-            check_error = False
-            if isinstance(data, xr.DataArray) or isinstance(data, xr.Dataset):
-                check_error = False
-            else:
-                check_error = True
-            if check_error:
-                raise TypeError
-        except TypeError:
-            print("data must be either an Xarray.DataArray or Xarray.Dataset")
+
         source_data = _dataset_to_monet(data)
         target_data = _dataset_to_monet(self._obj)
         source = self._get_CoordinateDefinition(source_data)
