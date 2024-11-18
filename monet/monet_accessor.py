@@ -188,7 +188,7 @@ def _coards_to_netcdf(dset, lat_name="lat", lon_name="lon"):
     """
     from numpy import arange, meshgrid
 
-    lon = wrap_longitudes(dset[lon_name])
+    lon = dset[lon_name]
     lat = dset[lat_name]
     lons, lats = meshgrid(lon, lat)
     x = arange(len(lon))
@@ -217,7 +217,7 @@ def _dataarray_coards_to_netcdf(dset, lat_name="lat", lon_name="lon"):
     """
     from numpy import arange, meshgrid
 
-    lon = wrap_longitudes(dset[lon_name])
+    lon = dset[lon_name]
     lat = dset[lat_name]
     lons, lats = meshgrid(lon, lat)
     x = arange(len(lon))
