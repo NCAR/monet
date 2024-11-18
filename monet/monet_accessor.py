@@ -1190,7 +1190,7 @@ class MONETAccessor:
             g = geo.CoordinateDefinition(lats=self._obj.latitude, lons=self._obj.longitude)
         return g
 
-    def remap_nearest(self, data, **kwargs):
+    def remap_nearest(self, data, radius_of_influence=1e6, **kwargs):
         """Remap `data` from another grid to the current self grid using pyresample
         nearest-neighbor interpolation.
 
@@ -1215,9 +1215,11 @@ class MONETAccessor:
 
         source_data = _dataset_to_monet(data)
         target_data = _dataset_to_monet(self._obj)
-        source = self._get_CoordinateDefinition(data=source_data)
-        target = self._get_CoordinateDefinition(data=target_data)
-        r = kd_tree.XArrayResamplerNN(source, target, **kwargs)
+        source = self._get_CoordinateDefinition(source_data)
+        target = self._get_CoordinateDefinition(target_data)
+        r = kd_tree.XArrayResamplerNN(
+            source, target, radius_of_influence=radius_of_influence, **kwargs
+        )
         r.get_neighbour_info()
         if isinstance(source_data, xr.DataArray):
             result = r.get_sample_from_neighbour_info(source_data)
@@ -1505,7 +1507,7 @@ class MONETAccessorDataset:
             g = geo.CoordinateDefinition(lats=self._obj.latitude, lons=self._obj.longitude)
         return g
 
-    def remap_nearest(self, data, radius_of_influence=1e6):
+    def remap_nearest(self, data, radius_of_influence=1e6, **kwargs):
         """Remap `data` from another grid to the current self grid using pyresample
         nearest-neighbor interpolation.
 
@@ -1531,7 +1533,9 @@ class MONETAccessorDataset:
         target_data = _dataset_to_monet(self._obj)
         source = self._get_CoordinateDefinition(source_data)
         target = self._get_CoordinateDefinition(target_data)
-        r = kd_tree.XArrayResamplerNN(source, target, radius_of_influence=radius_of_influence)
+        r = kd_tree.XArrayResamplerNN(
+            source, target, radius_of_influence=radius_of_influence, **kwargs
+        )
         r.get_neighbour_info()
         if isinstance(source_data, xr.DataArray):
             result = r.get_sample_from_neighbour_info(source_data)
