@@ -105,12 +105,10 @@ def test_combine_da_da():
     assert float(new.longitude.max()) == pytest.approx(0.9)
     assert float(new.latitude.min()) == pytest.approx(0.1)
     assert float(new.latitude.max()) == pytest.approx(0.9)
-    assert (obs.longitude.values == x).all(), "preserved"
-    assert (new.latitude.isel(x=0).values == obs.latitude.values).all()
 
-    # FIXME
-    assert not (new.longitude.isel(y=0).values == obs.longitude.values).all()
-    assert (new.longitude.isel(y=0).values == x_).all()
+    assert (obs.longitude.values == x).all(), "preserved"
+    assert (new.latitude.isel(x=0).values == obs.latitude.values).all(), "same as target"
+    assert (new.longitude.isel(y=0).values == obs.longitude.values).all(), "same as target"
 
     # Use orthogonal selection to get track
     a = new.data.values[:, new.y, new.x]
