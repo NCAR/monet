@@ -79,6 +79,7 @@ intersphinx_mapping = {
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "monetio": ("https://monetio.readthedocs.io/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
 }
 
 
@@ -86,6 +87,7 @@ linkcheck_ignore = [
     "https://glossary.ametsoc.org/wiki/",  # currently a cert issue
     "https://doi.org/10.1029/2000WR900033",  # 403 at Wiley
 ]
+linkcheck_report_timeouts_as_broken = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates", sphinx_autosummary_accessors.templates_path]
@@ -104,7 +106,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

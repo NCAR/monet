@@ -4,3 +4,4 @@
    "ALL",	"All of the above retrievals (SIZ to FLX) in one file"
           <th>CAf</th>
           <td>CAf</td>
+__author__ = "Yannick Copin <yannick.copin@laposte.net>"

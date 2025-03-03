@@ -4,7 +4,7 @@ Get in Touch
 
 Ask questions, suggest features or view source code `on GitHub`_.
 
-If an issue arrises please post on the
+If an issue arises please post on the
 `GitHub issues <https://github.com/noaa-oar-arl/monet/issues>`__.
 
 
@@ -13,6 +13,7 @@ API
 
 .. module:: monet
 
+.. py:currentmodule:: None
 
 Top-level functions
 ~~~~~~~~~~~~~~~~~~~

@@ -71,7 +71,7 @@ def combine_da_to_da(source, target, *, merge=True, interp_time=False, **kwargs)
     ----------
     source : xarray.DataArray or xarray.Dataset
         Gridded data.
-    target : xarray.DataArray
+    target : xarray.DataArray or xarray.Dataset
         Point observations.
     merge : bool
         If false, only return the interpolated source data.
@@ -87,13 +87,14 @@ def combine_da_to_da(source, target, *, merge=True, interp_time=False, **kwargs)
     """
     from ..monet_accessor import _dataset_to_monet
 
-    target_fixed = _dataset_to_monet(target)
-    source_fixed = _dataset_to_monet(source)
-    output = target_fixed.monet.remap_nearest(source_fixed, **kwargs)
+    output = target.monet.remap_nearest(source, **kwargs)
+
     if interp_time:
         output = output.interp(time=target.time)
+
     if merge:
-        output = xr.merge([target_fixed, output])
+        output = xr.merge([_dataset_to_monet(target), output])
+
     return output
 
 

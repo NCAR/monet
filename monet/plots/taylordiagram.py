@@ -2,6 +2,7 @@
 Taylor diagram (Taylor, 2001) test implementation.
 http://www-pcmdi.llnl.gov/about/staff/Taylor/CV/Taylor_diagram_primer.htm
 """
+
 import functools
 
 import matplotlib.pyplot as plt

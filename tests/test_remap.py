@@ -90,6 +90,11 @@ def test_combine_da_da():
         },
     )
 
+    # Longitude normalization introduces floating point error
+    x_ = (x + 180) % 360 - 180
+    assert not (x_ == x).any()
+    assert np.abs(x_ - x).max() < 5e-14
+
     # Combine (find closest model grid cell to each obs point)
     # NOTE: to use `merge`, must have matching `level` dims
     new = combine_da_to_da(model, obs, merge=False, interp_time=False)
@@ -100,8 +105,10 @@ def test_combine_da_da():
     assert float(new.longitude.max()) == pytest.approx(0.9)
     assert float(new.latitude.min()) == pytest.approx(0.1)
     assert float(new.latitude.max()) == pytest.approx(0.9)
-    assert (new.latitude.isel(x=0).values == obs.latitude.values).all()
-    assert np.allclose(new.longitude.isel(y=0).values, obs.longitude.values)
+
+    assert (obs.longitude.values == x).all(), "preserved"
+    assert (new.latitude.isel(x=0).values == obs.latitude.values).all(), "same as target"
+    assert (new.longitude.isel(y=0).values == obs.longitude.values).all(), "same as target"
 
     # Use orthogonal selection to get track
     a = new.data.values[:, new.y, new.x]
