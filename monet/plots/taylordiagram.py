@@ -1,5 +1,16 @@
 """
-Taylor diagram (Taylor, 2001) test implementation.
+Taylor diagram (Taylor, 2001) implementation.
+
+A Taylor diagram is a graphical representation of how well a model simulates
+an observed pattern. It provides a way to summarize multiple aspects of model
+performance, including:
+- Correlation coefficient
+- Root-mean-square (RMS) difference
+- The standard deviation ratio
+
+Reference:
+Taylor, K.E., 2001. Summarizing multiple aspects of model performance in a
+single diagram. Journal of Geophysical Research, 106(D7), 7183-7192.
 http://www-pcmdi.llnl.gov/about/staff/Taylor/CV/Taylor_diagram_primer.htm
 """
 
@@ -16,6 +27,8 @@ colors = ["#DA70D6", "#228B22", "#FA8072", "#FF1493"]
 
 
 def _sns_context(f):
+    """Decorator to apply seaborn color palette to a function."""
+
     @functools.wraps(f)
     def inner(*args, **kwargs):
         with sns.color_palette(colors):
@@ -25,16 +38,44 @@ def _sns_context(f):
 
 
 class TaylorDiagram:
-    """Taylor diagram: plot model standard deviation and correlation
-    to reference (data) sample in a single-quadrant polar plot, with
-    r=stddev and theta=arccos(correlation).
+    """
+    :no-index:
+
+    Taylor diagram for visualizing model performance metrics.
+
+    The Taylor diagram displays multiple statistical metrics in a single plot:
+    - The radial distance from the origin represents the standard deviation
+    - The azimuthal position represents the correlation coefficient
+    - The distance from the reference point represents the root-mean-square (RMS) difference
+
+    This class creates a Taylor diagram in a polar plot, where:
+    - r = standard deviation
+    - θ = arccos(correlation coefficient)
+
+    This provides a comprehensive view of how well a model pattern matches observations.
     """
 
     @_sns_context
     def __init__(self, refstd, scale=1.5, fig=None, rect=111, label="_"):
-        """Set up Taylor diagram axes, i.e. single quadrant polar
-        plot, using mpl_toolkits.axisartist.floating_axes. refstd is
-        the reference standard deviation to be compared to.
+        """Initialize the Taylor diagram.
+
+        Parameters
+        ----------
+        refstd : float
+            The reference standard deviation (e.g., from observations or a reference model)
+            that other models will be compared against.
+        scale : float, default 1.5
+            The maximum standard deviation shown on the plot, as a multiple of refstd.
+            For example, if refstd=2 and scale=1.5, the maximum standard deviation
+            displayed will be 3.0.
+        fig : matplotlib.figure.Figure, optional
+            Figure to use. If None, a new figure will be created.
+        rect : int or tuple, default 111
+            Subplot specification (nrows, ncols, index) or 3-digit integer where
+            the digits represent nrows, ncols, and index in order.
+        label : str, default "_"
+            Label for the reference point. An underscore prefix makes the label not
+            appear in the legend.
         """
 
         import mpl_toolkits.axisartist.floating_axes as FA
@@ -101,9 +142,30 @@ class TaylorDiagram:
 
     @_sns_context
     def add_sample(self, stddev, corrcoef, *args, **kwargs):
-        """Add sample (stddev,corrcoeff) to the Taylor diagram. args
-        and kwargs are directly propagated to the Figure.plot
-        command."""
+        """Add a sample point to the Taylor diagram.
+
+        Parameters
+        ----------
+        stddev : float
+            Standard deviation of the sample to add.
+        corrcoef : float
+            Correlation coefficient between the sample and reference (-1 to 1).
+        *args
+            Additional positional arguments passed to matplotlib's plot function.
+        **kwargs
+            Additional keyword arguments passed to matplotlib's plot function.
+            Common options include 'marker', 'markersize', 'color', and 'label'.
+
+        Returns
+        -------
+        matplotlib.lines.Line2D
+            The line object representing the sample in the plot.
+
+        Notes
+        -----
+        Points closer to the reference point indicate better agreement with
+        the reference dataset.
+        """
         (l,) = self.ax.plot(np.arccos(corrcoef), stddev, *args, **kwargs)  # (theta,radius)
         self.samplePoints.append(l)
 
@@ -111,7 +173,28 @@ class TaylorDiagram:
 
     @_sns_context
     def add_contours(self, levels=5, **kwargs):
-        """Add constant centered RMS difference contours."""
+        """Add constant RMS difference contours to the Taylor diagram.
+
+        Parameters
+        ----------
+        levels : int or array-like, default 5
+            If an integer, it defines the number of equally-spaced contour levels.
+            If array-like, it explicitly defines the contour levels.
+        **kwargs
+            Additional keyword arguments passed to matplotlib's contour function.
+            Common options include 'colors', 'linewidths', and 'linestyles'.
+
+        Returns
+        -------
+        matplotlib.contour.QuadContourSet
+            The contour set created by the function.
+
+        Notes
+        -----
+        These contours represent lines of constant RMS difference between the
+        reference and sample datasets. They help visualize the combined effect
+        of differences in standard deviation and correlation.
+        """
 
         rs, ts = np.meshgrid(np.linspace(self.smin, self.smax), np.linspace(0, np.pi / 2))
         # Compute centered RMS difference

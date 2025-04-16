@@ -2,6 +2,7 @@ import warnings
 
 from .colorbars import cmap_discretize, colorbar_index
 from .mapgen import draw_map
+from .plots import create_taylor_diagram  # Import with original name
 from .plots import (
     kdeplot,
     make_spatial_contours,
@@ -10,11 +11,14 @@ from .plots import (
     scatter,
     spatial,
     spatial_bias_scatter,
-    taylordiagram,
     timeseries,
     wind_barbs,
     wind_quiver,
 )
+
+# Don't import the taylordiagram module at all in __init__
+# Keep the function available under a clear name
+taylordiagram = create_taylor_diagram  # Rename for public API
 
 __all__ = (
     #
@@ -160,6 +164,46 @@ def sp_scatter_bias(
     val_min=None,
     **kwargs,
 ):
+    """Create a spatial scatter plot showing the bias (difference) between two columns in a DataFrame.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing latitude, longitude, and data columns to compare.
+    col1 : str
+        Name of the first column (reference value).
+    col2 : str
+        Name of the second column (comparison value).
+    ax : matplotlib.axes.Axes, optional
+        Axes to plot on. If None, creates a new map using draw_map.
+    outline : bool, default False
+        Whether to show the map outline.
+    tight : bool, default True
+        Whether to apply tight_layout to the figure.
+    global_map : bool, default True
+        Whether to set global map boundaries (-180 to 180 longitude, -90 to 90 latitude).
+    map_kwargs : dict, default {}
+        Keyword arguments passed to draw_map if creating a new map.
+    cbar_kwargs : dict, default {}
+        Keyword arguments for colorbar customization.
+    val_max : float, optional
+        Maximum value for color scaling. If None, uses 95th percentile of absolute differences.
+    val_min : float, optional
+        Minimum value for color scaling (not currently used).
+    **kwargs : dict
+        Additional keyword arguments passed to DataFrame.plot.scatter.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The axes object containing the plot.
+
+    Notes
+    -----
+    The point size is scaled by the magnitude of the difference between col2 and col1,
+    making larger differences more visually prominent. Differences are capped at 300 units
+    for display purposes.
+    """
     import matplotlib.pyplot as plt
     from scipy.stats import scoreatpercentile as score
 
@@ -202,7 +246,23 @@ def sp_scatter_bias(
 
 
 def _set_outline_patch_alpha(ax, alpha=0):
-    """For :class:`cartopy.mpl.geoaxes.GeoAxes`"""
+    """Set the transparency of map outline patches for Cartopy GeoAxes.
+
+    This function attempts multiple methods to set the alpha (transparency) of
+    map outlines when using Cartopy, handling different versions and configurations.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes or cartopy.mpl.geoaxes.GeoAxes
+        The axes object whose outline transparency should be modified.
+    alpha : float, default 0
+        Alpha value between 0 (fully transparent) and 1 (fully opaque).
+
+    Notes
+    -----
+    The function tries multiple approaches to accommodate different Cartopy versions
+    and configurations. If all attempts fail, a warning is issued.
+    """
     for f in [
         lambda alpha: ax.axes.outline_patch.set_alpha(alpha),
         lambda alpha: ax.outline_patch.set_alpha(alpha),

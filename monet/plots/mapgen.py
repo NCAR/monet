@@ -22,6 +22,10 @@ def draw_map(
 ):
     """Draw a map with Cartopy.
 
+    Creates a map using Cartopy with configurable features like coastlines,
+    borders, and natural earth elements. This function simplifies the process
+    of creating maps for spatial visualization.
+
     Parameters
     ----------
     crs : cartopy.crs.Projection
@@ -40,7 +44,7 @@ def draw_map(
         Add country borders (`linewidth` applied).
     resolution : {'10m', '50m', '110m'}
         The resolution of the Natural Earth features for coastlines, states, and counties.
-        The others are set automatically.
+        Higher resolution (e.g., '10m') provides more detail but may be slower to render.
     extent : array-like
         Set the map extent with ``[lon_min,lon_max,lat_min,lat_max]``.
     figsize : tuple
@@ -56,9 +60,30 @@ def draw_map(
 
     Returns
     -------
-    :
+    matplotlib.axes.Axes or tuple
         By default, returns just the ``ax`` (:class:`cartopy.mpl.geoaxes.GeoAxes` instance).
-        If `return_fig` is true, returns ``fig, ax``.
+        If `return_fig` is true, returns a tuple of ``(fig, ax)`` where ``fig`` is the
+        matplotlib Figure instance and ``ax`` is the GeoAxes instance.
+
+    Notes
+    -----
+    The '10m' resolution provides the most detailed features but can be slow for
+    large or global maps. '50m' is a good compromise for regional maps, while '110m'
+    works well for global views.
+
+    Examples
+    --------
+    >>> # Create a simple map with coastlines
+    >>> ax = draw_map(coastlines=True, resolution='50m')
+
+    >>> # Create a detailed US map with states and counties
+    >>> ax = draw_map(
+    ...     crs=ccrs.AlbersEqualArea(central_longitude=-95),
+    ...     states=True,
+    ...     counties=True,
+    ...     resolution='10m',
+    ...     extent=[-125, -65, 25, 50]
+    ... )
     """
     kwargs["figsize"] = figsize
     if "subplot_kw" not in kwargs:

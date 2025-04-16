@@ -4,17 +4,20 @@
 def latlon_xarray_to_CoordinateDefinition(longitude=None, latitude=None):
     """Create pyresample SwathDefinition from xarray object.
 
+    Converts xarray latitude and longitude coordinate arrays into a
+    pyresample CoordinateDefinition suitable for spatial interpolation.
+
     Parameters
     ----------
-    longitude : 2d xarray.DataArray
-        Longitude -> must be from -180 -> 180 and monotonically increasing
-    latitude : 2d xarray.DataArray
-        Latitude -> must be from -90 -> 90 and monotonically increasing
+    longitude : 2D xarray.DataArray
+        Longitude array -> must be from -180 -> 180 and monotonically increasing.
+    latitude : 2D xarray.DataArray
+        Latitude array -> must be from -90 -> 90 and monotonically increasing.
 
     Returns
     -------
-    pyresample.CoordinateDefinition
-
+    pyresample.geometry.CoordinateDefinition
+        A coordinate definition object that can be used with pyresample.
     """
     from pyresample import geometry
 
@@ -22,20 +25,22 @@ def latlon_xarray_to_CoordinateDefinition(longitude=None, latitude=None):
 
 
 def lonlat_to_xesmf(longitude=None, latitude=None):
-    """Creates an empty xarray.Dataset with the coordinate (longitude, latitude).
+    """Create an empty xarray.Dataset with longitude and latitude coordinates.
+
+    Creates a minimal xarray Dataset with the provided coordinates to be used
+    as a target grid for xESMF regridding.
 
     Parameters
     ----------
-    longitude : type
-        Description of parameter `longitude`.
-    latitude : type
-        Description of parameter `latitude`.
+    longitude : array-like
+        Longitude value(s).
+    latitude : array-like
+        Latitude value(s).
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    xarray.Dataset
+        A dataset with lon/lat coordinates suitable for use with xesmf.
     """
     import xarray as xr
     from numpy import asarray
@@ -49,20 +54,19 @@ def lonlat_to_xesmf(longitude=None, latitude=None):
 
 
 def lonlat_to_swathdefinition(longitude=None, latitude=None):
-    """Short summary.
+    """Create a pyresample SwathDefinition from longitude and latitude arrays.
 
     Parameters
     ----------
-    longitude : type
-        Description of parameter `longitude`.
-    latitude : type
-        Description of parameter `latitude`.
+    longitude : array-like
+        Longitude values, either 1D or 2D.
+    latitude : array-like
+        Latitude values, either 1D or 2D.
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    pyresample.geometry.SwathDefinition
+        A SwathDefinition object for the provided coordinates.
     """
     from numpy import vstack
     from pyresample.geometry import SwathDefinition
@@ -77,20 +81,21 @@ def lonlat_to_swathdefinition(longitude=None, latitude=None):
 
 
 def nearest_point_swathdefinition(longitude=None, latitude=None):
-    """Creates a pyreample.geometry.SwathDefinition for a single point.
+    """Create a SwathDefinition for a single point.
+
+    Used for nearest neighbor point-to-point interpolation.
 
     Parameters
     ----------
     longitude : float
-        longitude.
+        Longitude of the point.
     latitude : float
-        latitude.
+        Latitude of the point.
 
     Returns
     -------
-    pyreample.geometry.SwathDefinition
-
-
+    pyresample.geometry.SwathDefinition
+        A SwathDefinition representing a single point.
     """
     from numpy import vstack
     from pyresample.geometry import SwathDefinition
@@ -101,20 +106,20 @@ def nearest_point_swathdefinition(longitude=None, latitude=None):
 
 
 def constant_1d_xesmf(longitude=None, latitude=None):
-    """Creates a pyreample.geometry.SwathDefinition with a constant latitude along
-    the longitude array.  Longitude can be a 1d or 2d np.array or xr.DataArray
+    """Create a dataset with a constant latitude along a longitude array.
 
     Parameters
     ----------
-    longitude : numpy.array or xarray.DataArray
-        Array of longitude values
-    latitude : float
-        latitude for constant
+    longitude : array-like
+        Array of longitude values.
+    latitude : float or array-like
+        Latitude value(s) to use as a constant.
 
     Returns
     -------
-    pyreample.geometry.SwathDefinition
-
+    xarray.Dataset
+        A dataset with coordinates suitable for xesmf, where longitude varies
+        but latitude is constant.
     """
     import xarray as xr
     from numpy import asarray
@@ -129,20 +134,19 @@ def constant_1d_xesmf(longitude=None, latitude=None):
 
 
 def constant_lat_swathdefition(longitude=None, latitude=None):
-    """Creates a pyreample.geometry.SwathDefinition with a constant latitude along
-    the longitude array.  Longitude can be a 1d or 2d np.array or xr.DataArray
+    """Create a SwathDefinition with constant latitude along a longitude array.
 
     Parameters
     ----------
-    longitude : numpy.array or xarray.DataArray
-        Array of longitude values
+    longitude : array-like
+        Array of longitude values, 1D or 2D.
     latitude : float
-        latitude for constant
+        Constant latitude value to use for all points.
 
     Returns
     -------
-    pyreample.geometry.SwathDefinition
-
+    pyresample.geometry.SwathDefinition
+        A SwathDefinition with constant latitude.
     """
     from numpy import vstack
     from pyresample import geometry
@@ -159,20 +163,19 @@ def constant_lat_swathdefition(longitude=None, latitude=None):
 
 
 def constant_lon_swathdefition(longitude=None, latitude=None):
-    """Creates a pyreample.geometry.SwathDefinition with a constant longitude along
-    the latitude array.  latitude can be a 1d or 2d np.array or xr.DataArray
+    """Create a SwathDefinition with constant longitude along a latitude array.
 
     Parameters
     ----------
-    longitude :
-        latitude for constant
-    latitude : numpy.array or xarray.DataArray
-        Array of longitude values
+    longitude : float
+        Constant longitude value to use for all points.
+    latitude : array-like
+        Array of latitude values, 1D or 2D.
 
     Returns
     -------
-    pyreample.geometry.SwathDefinition
-
+    pyresample.geometry.SwathDefinition
+        A SwathDefinition with constant longitude.
     """
     from numpy import vstack
     from pyresample import geometry

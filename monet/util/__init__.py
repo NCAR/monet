@@ -10,10 +10,43 @@ __all__ = ["stats", "mystats", "tools", "interp_util", "resample", "combinetool"
 
 
 def nearest(items, pivot):
+    """Find the nearest value to pivot in a list of items.
+
+    Parameters
+    ----------
+    items : list-like
+        Collection of values to search through.
+    pivot : float or int
+        The value to find the nearest match to.
+
+    Returns
+    -------
+    object
+        The item from the collection that is closest to the pivot value.
+    """
     return min(items, key=lambda x: abs(x - pivot))
 
 
 def search_listinlist(array1, array2):
+    """Find matching indices between two arrays.
+
+    This function identifies common elements between two arrays and returns
+    the corresponding indices in each array.
+
+    Parameters
+    ----------
+    array1 : numpy.ndarray
+        First array to search for matches.
+    array2 : numpy.ndarray
+        Second array to search for matches.
+
+    Returns
+    -------
+    tuple
+        (index1, index2) where:
+        - index1 is a sorted array of indices in array1 where matches were found
+        - index2 is a sorted array of indices in array2 where matches were found
+    """
     # find intersections
 
     s1 = set(array1.flatten())
@@ -34,6 +67,24 @@ def search_listinlist(array1, array2):
 
 
 def linregress(x, y):
+    """Perform a linear regression using statsmodels.
+
+    Parameters
+    ----------
+    x : array-like
+        Independent variable values.
+    y : array-like
+        Dependent variable values.
+
+    Returns
+    -------
+    tuple
+        (slope, intercept, r_squared, standard_error) where:
+        - slope is the regression line slope
+        - intercept is the regression line y-intercept
+        - r_squared is the coefficient of determination
+        - standard_error is the standard error of the residuals
+    """
     import statsmodels.api as sm
 
     xx = sm.add_constant(x)
@@ -46,6 +97,22 @@ def linregress(x, y):
 
 
 def findclosest(list, value):
+    """Find the index and value of the closest element to a target value.
+
+    Parameters
+    ----------
+    list : list-like
+        Collection of values to search through.
+    value : float or int
+        The target value to find the closest match to.
+
+    Returns
+    -------
+    tuple
+        (index, closest_value) where:
+        - index is the position in the list of the closest value
+        - closest_value is the value from the list that is closest to the target
+    """
     a = min((abs(x - value), x, i) for i, x in enumerate(list))
     return a[2], a[1]
 
@@ -54,6 +121,18 @@ def _force_forder(x):
     """
     Converts arrays x to fortran order. Returns
     a tuple in the form (x, is_transposed).
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Array to potentially convert to Fortran-order.
+
+    Returns
+    -------
+    tuple
+        (result_array, is_transposed) where:
+        - result_array is the array in Fortran-order
+        - is_transposed is a boolean indicating if transposition was performed
     """
     if x.flags.c_contiguous:
         return (x.T, True)
@@ -62,13 +141,27 @@ def _force_forder(x):
 
 
 def kolmogorov_zurbenko_filter(df, window, iterations):
+    """Apply a Kolmogorov-Zurbenko filter to a time series.
+
+    A Kolmogorov-Zurbenko filter is a low-pass filter created by iteratively
+    applying a moving average of specified window length.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame or pandas.Series
+        Time series data to filter.
+    window : int
+        Size of the moving average window (m = 2q+1).
+    iterations : int
+        Number of times to apply the moving average filter.
+
+    Returns
+    -------
+    pandas.DataFrame or pandas.Series
+        Filtered time series.
+    """
     import pandas as pd
 
-    """KZ filter implementation
-        series is a pandas series
-        window is the filter window m in the units of the data (m = 2q+1)
-        iterations is the number of times the moving average is evaluated
-        """
     z = df.copy()
     for i in range(iterations):
         z = pd.rolling_mean(z, window=window, min_periods=1, center=True)

@@ -1237,29 +1237,30 @@ def PSUTNMdnPE(obs, mod, axis=None):
 
 
 def R2(obs, mod, axis=None):
-    """Coefficient of Determination (unit squared)
+    """Calculate the coefficient of determination (R-squared).
+
+    Computes R-squared statistic between observed and modeled values.
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    axis : type
-        Description of parameter `axis`.
+    obs : numpy.ndarray
+        Observed values
+    mod : numpy.ndarray
+        Modeled values
+    axis : int, optional
+        Axis along which to compute R-squared. Default is None (whole array).
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float or numpy.ndarray
+        R-squared value(s). If axis=None, returns a float.
+        Otherwise returns array of R-squared values along specified axis.
     """
-
     from scipy.stats import pearsonr
 
     if axis is None:
-        obsc, modc = matchedcompressed(obs, mod)
-        return pearsonr(obsc, modc)[0] ** 2
+        cc = pearsonr(obs.flatten(), mod.flatten())[0]
+        return cc * cc
     else:
         raise ValueError("Not ready yet")
 
@@ -1360,40 +1361,47 @@ def RMSEs(obs, mod, axis=None):
 
 
 def matchmasks(a1, a2):
-    """Short summary.
+    """Match masks between two arrays.
+
+    Creates a combined mask from two arrays, ensuring they have compatible
+    masking for operations.
 
     Parameters
     ----------
-    a1 : type
-        Description of parameter `a1`.
-    a2 : type
-        Description of parameter `a2`.
+    a1 : numpy.ndarray or numpy.ma.MaskedArray
+        First array to match masks
+    a2 : numpy.ndarray or numpy.ma.MaskedArray
+        Second array to match masks
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    tuple
+        (masked_a1, masked_a2) containing both arrays with matched masks
     """
     mask = np.ma.getmaskarray(a1) | np.ma.getmaskarray(a2)
-    return np.ma.masked_where(mask, a1), np.ma.masked_where(mask, a2)
+    a1 = np.ma.array(a1, mask=mask)
+    a2 = np.ma.array(a2, mask=mask)
+    return a1, a2
 
 
 def matchedcompressed(a1, a2):
-    """Short summary.
+    """Match masks and compress arrays to 1D.
+
+    First matches masks between arrays then compresses them to 1D by
+    removing masked values.
 
     Parameters
     ----------
-    a1 : type
-        Description of parameter `a1`.
-    a2 : type
-        Description of parameter `a2`.
+    a1 : numpy.ndarray or numpy.ma.MaskedArray
+        First array to process
+    a2 : numpy.ndarray or numpy.ma.MaskedArray
+        Second array to process
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    tuple
+        (compressed_a1, compressed_a2) containing flattened 1D arrays
+        with masked values removed
     """
     a1, a2 = matchmasks(a1, a2)
     return a1.compressed(), a2.compressed()
@@ -1509,22 +1517,21 @@ def IOA_m(obs, mod, axis=None):
 
 
 def IOA(obs, mod, axis=None):
-    """Index of Agreement, IOA
+    """Calculate the Index of Agreement (IOA).
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    axis : type
-        Description of parameter `axis`.
+    obs : numpy.ndarray
+        Observed values
+    mod : numpy.ndarray
+        Modeled values
+    axis : int, optional
+        Axis along which to calculate IOA. Default is None (flatten array)
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float
+        Index of Agreement value between 0 and 1, where 1 indicates perfect agreement
     """
     obsmean = obs.mean(axis=axis)
     if axis is not None:
@@ -1536,18 +1543,19 @@ def IOA(obs, mod, axis=None):
 
 
 def circlebias_m(b):
-    """avoid single block error in np.ma
+    """Calculate circular bias avoiding single block error.
+
+    For circular quantities like wind direction where the values wrap around.
 
     Parameters
     ----------
-    b : type
-        Description of parameter `b`.
+    b : numpy.ndarray
+        Array of differences between values (e.g. model - obs)
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    numpy.ndarray
+        Bias values adjusted for circular nature of data
     """
     b = np.where(b > 180, b - 360, b)
     b = np.where(b < -180, b + 360, b)
@@ -1555,18 +1563,19 @@ def circlebias_m(b):
 
 
 def circlebias(b):
-    """Short summary.
+    """Calculate circular bias.
+
+    For circular quantities like wind direction where the values wrap around.
 
     Parameters
     ----------
-    b : type
-        Description of parameter `b`.
+    b : numpy.ndarray
+        Array of differences between values (e.g. model - obs)
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    numpy.ndarray
+        Bias values adjusted for circular nature of data
     """
     b = np.ma.where(b > 180, b - 360, b)
     b = np.ma.where(b < -180, b + 360, b)
@@ -1574,22 +1583,23 @@ def circlebias(b):
 
 
 def WDIOA_m(obs, mod, axis=None):
-    """Wind Direction Index of Agreement, IOA (avoid single block error in np.ma)
+    """Calculate wind direction Index of Agreement.
+
+    Modified version that handles circular nature of wind direction.
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    axis : type
-        Description of parameter `axis`.
+    obs : numpy.ndarray
+        Observed wind directions
+    mod : numpy.ndarray
+        Modeled wind directions
+    axis : int, optional
+        Axis along which to compute
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float or numpy.ndarray
+        Wind direction IOA value(s)
     """
     obsmean = obs.mean(axis=axis)
     if axis is not None:
@@ -1606,22 +1616,21 @@ def WDIOA_m(obs, mod, axis=None):
 
 
 def WDIOA(obs, mod, axis=None):
-    """Wind Direction Index of Agreement, IOA
+    """Calculate Wind Direction Index of Agreement.
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    axis : type
-        Description of parameter `axis`.
+    obs : numpy.ndarray
+        Observed wind direction values (degrees)
+    mod : numpy.ndarray
+        Modeled wind direction values (degrees)
+    axis : int, optional
+        Axis along which to compute. Default is None (flatten array)
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float
+        Wind Direction Index of Agreement value
     """
     obsmean = obs.mean(axis=axis)
     if axis is not None:
@@ -1639,22 +1648,21 @@ def WDIOA(obs, mod, axis=None):
 
 
 def AC(obs, mod, axis=None):
-    """Anomaly Correlation
+    """Calculate Anomaly Correlation.
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    axis : type
-        Description of parameter `axis`.
+    obs : numpy.ndarray
+        Observed values
+    mod : numpy.ndarray
+        Modeled values
+    axis : int, optional
+        Axis along which to compute. Default is None (flatten array)
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float
+        Anomaly correlation coefficient
     """
     obs_bar = obs.mean(axis=axis)
     if axis is not None:
@@ -1694,24 +1702,23 @@ def WDAC(obs, mod, axis=None):
 
 
 def HSS(obs, mod, minval, maxval):
-    """Heidke Skill Score (1 is perfect - below zero means no confidence)
+    """Calculate Heidke Skill Score.
 
     Parameters
     ----------
-    obs : type
-        Description of parameter `obs`.
-    mod : type
-        Description of parameter `mod`.
-    minval : type
-        Description of parameter `minval`.
-    maxval : type
-        Description of parameter `maxval`.
+    obs : numpy.ndarray
+        Observed values
+    mod : numpy.ndarray
+        Modeled values
+    minval : float
+        Minimum threshold value for contingency table
+    maxval : float
+        Maximum threshold value for contingency table
 
     Returns
     -------
-    type
-        Description of returned object.
-
+    float
+        Heidke Skill Score value
     """
     a, b, c, d = scores(obs, mod, minval, maxval=maxval)
     hss = 2 * (a * d - b * c) / ((a + c) * (c + d) + (a + b) * (b + d))
@@ -1773,22 +1780,23 @@ def CSI(obs, mod, minval, maxval):
 
 
 def scores(obs, mod, minval, maxval=1.0e5):
-    """Calculate scores.
+    """Calculate multiple verification scores between obs and model.
 
     Parameters
     ----------
-    obs : array-like
-        Observation values ("truth").
-    mod : array-like
-        Model values ("prediction").
-        Should be the same size as `obs`.
-    minval, minval : float
-        Interval to test (exclusive on both sides).
+    obs : numpy.ndarray
+        Observed values
+    mod : numpy.ndarray
+        Modeled values
+    minval : float
+        Minimum threshold value for categorical scores
+    maxval : float, optional
+        Maximum threshold value for categorical scores. Default is 1.0e5
 
     Returns
     -------
-    a, b, c, d : float
-        Counts of hits, misses, false alarms, and correct negatives.
+    dict
+        Dictionary containing various statistical scores
     """
     import pandas as pd
 

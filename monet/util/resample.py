@@ -17,6 +17,9 @@ except ImportError:
 def _ensure_swathdef_compatability(defn):
     """Ensures the SwathDefinition is compatible with XArrayResamplerNN.
 
+    Converts longitude and latitude arrays in the SwathDefinition to xarray
+    DataArrays if they aren't already, which is required for XArrayResamplerNN.
+
     Parameters
     ----------
     defn : pyresample.geometry.SwathDefinition
@@ -25,6 +28,7 @@ def _ensure_swathdef_compatability(defn):
     Returns
     -------
     pyresample.geometry.SwathDefinition
+        A compatible SwathDefinition with xarray DataArrays for lons and lats.
     """
     import xarray as xr
 
@@ -38,16 +42,18 @@ def _ensure_swathdef_compatability(defn):
 
 def _check_swath_or_area(defn):
     """Checks for a SwathDefinition or AreaDefinition. If AreaDefinition do
-    nothing else ensure compatibility with XArrayResamplerNN
+    nothing else ensure compatibility with XArrayResamplerNN.
 
     Parameters
     ----------
     defn : pyresample.geometry.SwathDefinition or pyresample.geometry.AreaDefinition
+        The grid definition to check and potentially convert.
 
     Returns
     -------
-    new_defn
-        SwathDefinition or AreaDefinition
+    pyresample.geometry.SwathDefinition or pyresample.geometry.AreaDefinition
+        The (potentially modified) grid definition ensuring compatibility
+        with XArrayResamplerNN.
     """
     try:
         if isinstance(defn, SwathDefinition):
@@ -63,22 +69,24 @@ def _check_swath_or_area(defn):
 
 
 def _reformat_resampled_data(orig, new, target_grid):
-    """reformats the resampled data array filling in coords, name and attrs .
+    """Reformats the resampled data array filling in coords, name and attrs.
+
+    After resampling, this function ensures the new DataArray has proper
+    coordinates, name, and attributes from the original.
 
     Parameters
     ----------
     orig : xarray.DataArray
-        original input DataArray.
+        Original input DataArray.
     new : xarray.DataArray
-        resampled xarray.DataArray
+        Resampled xarray.DataArray
     target_grid : pyresample.geometry
-        target grid is the target SwathDefinition or AreaDefinition
+        Target grid is the target SwathDefinition or AreaDefinition
 
     Returns
     -------
     xarray.DataArray
-        reformatted xarray.DataArray
-
+        Reformatted xarray.DataArray with proper coordinates and attributes.
     """
     target_lon, target_lat = target_grid.get_lonlats_dask()
     new.name = orig.name
@@ -89,6 +97,27 @@ def _reformat_resampled_data(orig, new, target_grid):
 
 
 def resample_stratify(da, levels, vertical, axis=1):
+    """Vertically interpolate data to specified levels.
+
+    Uses stratify package to interpolate a DataArray to new vertical levels.
+
+    Parameters
+    ----------
+    da : xarray.DataArray
+        The data to interpolate. Must have a vertical dimension.
+    levels : array-like
+        The target vertical levels to interpolate to.
+    vertical : array-like
+        The current vertical coordinate values.
+    axis : int, default 1
+        The axis representing the vertical dimension.
+
+    Returns
+    -------
+    xarray.DataArray
+        Data interpolated to the new vertical levels, preserving attributes
+        and other coordinates.
+    """
     import stratify
     import xarray as xr
 
@@ -104,6 +133,27 @@ def resample_stratify(da, levels, vertical, axis=1):
 
 
 def resample_xesmf(source_da, target_da, cleanup=False, **kwargs):
+    """Resample data from one grid to another using xESMF.
+
+    Uses xESMF to perform regridding between different coordinate systems and grids.
+
+    Parameters
+    ----------
+    source_da : xarray.DataArray or xarray.Dataset
+        The source data to regrid.
+    target_da : xarray.DataArray or xarray.Dataset
+        The target grid to regrid onto.
+    cleanup : bool, default False
+        Whether to remove the temporary weight file after regridding.
+    **kwargs
+        Additional keyword arguments passed to xesmf.Regridder constructor.
+        Common options include 'method' and 'locstream_out'.
+
+    Returns
+    -------
+    xarray.DataArray or xarray.Dataset
+        The regridded data with the same type as source_da.
+    """
     if has_xesmf:
         import xarray as xr
         import xesmf as xe

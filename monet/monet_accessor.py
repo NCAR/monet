@@ -510,13 +510,19 @@ class MONETAccessorPandas:
 
 @xr.register_dataarray_accessor("monet")
 class MONETAccessor:
-    """MONET."""
+    """MONET accessor for xarray DataArrays.
+
+    This accessor provides methods for working with atmospheric model and
+    observation data using the Model and Observation Evaluation Toolkit (MONET).
+    """
 
     def __init__(self, xray_obj):
-        """
+        """Initialize the MONET accessor.
+
         Parameters
         ----------
         xray_obj : xarray.DataArray
+            DataArray to attach accessor methods to
         """
         self._obj = xray_obj
 
@@ -647,19 +653,21 @@ class MONETAccessor:
             self._obj = _dataset_to_monet(self._obj, lat_name=lat_name, lon_name=lon_name)
 
     def stratify(self, levels, vertical, axis=1):
-        """Resample in the vertical with stratify.
+        """Interpolate data to specified vertical levels.
 
         Parameters
         ----------
-        levels
-            Values to interpolate to.
-        vertical
-            Vertical dimension coordinate variable.
-        axis : int
+        levels : array-like
+            Target vertical levels
+        vertical : array-like
+            Current vertical coordinate values
+        axis : int, default 1
+            Axis representing vertical dimension
 
         Returns
         -------
         xarray.DataArray
+            Data interpolated to new vertical levels
         """
         from .util.resample import resample_stratify
 
@@ -1994,7 +2002,6 @@ class MONETAccessorDataset:
     #     radius
 
     #     Returns
-    #     -------
     #     pandas.DataFrame
     #     """
     #     if has_pyresample:

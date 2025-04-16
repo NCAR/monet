@@ -3,29 +3,30 @@ from pandas import Series, merge_asof
 
 
 def combine_da_to_df(da, df, *, merge=True, **kwargs):
-    """Combine xarray data array `da` with spatial information
-    point observations in dataframe `df`, returning a new dataframe.
+    """Combine xarray data array with point observations in a DataFrame.
 
-    Uses pyresample via ``.monet.remap_nearest``.
+    Interpolates gridded data to observation points using nearest neighbor
+    interpolation, then merges with the original observation data.
 
     Parameters
     ----------
     da : xarray.DataArray or xarray.Dataset
-        Data to be interpolated to target grid points.
+        Gridded data to be interpolated to target points.
         Can be unstructured-grid data
         (detected by checking ``'mio_has_unstructured_grid'`` attribute).
     df : pandas.DataFrame
-        Data on target points.
-    merge : bool
-        Merge interpolated `df` data with `da` data.
-        Otherwise, return interpolated `da` data only.
-    kwargs : dict
-        Passed to :meth:`~monet.monet_accessor.MONETAccessor.remap_nearest`
-        (if `da` is not unstructured-grid data).
+        Point observations with 'latitude', 'longitude', and 'siteid' columns.
+    merge : bool, default True
+        If True, merge interpolated values with the original DataFrame.
+        If False, return only the interpolated values.
+    **kwargs : dict
+        Additional arguments passed to remap_nearest or remap_nearest_unstructured.
 
     Returns
     -------
     pandas.DataFrame
+        DataFrame with interpolated model values at observation locations,
+        either merged with original data (if merge=True) or standalone.
     """
     target_da = df.drop_duplicates(subset=["siteid"]).dropna(
         subset=["latitude", "longitude", "siteid"]
@@ -62,28 +63,30 @@ def combine_da_to_df(da, df, *, merge=True, **kwargs):
 
 
 def combine_da_to_da(source, target, *, merge=True, interp_time=False, **kwargs):
-    """Combine xarray data array `source` with with point observations
-    in second data array `target`, returning a new xarray object.
+    """Combine gridded data with point observation data in xarray format.
 
-    Uses pyresample nearest-neighbor via ``.monet.remap_nearest``.
+    Interpolates source gridded data to target point locations using nearest neighbor
+    interpolation, with optional time interpolation and merging.
 
     Parameters
     ----------
     source : xarray.DataArray or xarray.Dataset
-        Gridded data.
+        Gridded data to interpolate from.
     target : xarray.DataArray or xarray.Dataset
-        Point observations.
-    merge : bool
-        If false, only return the interpolated source data.
-        If true, merge with the target data.
-    interp_time : bool
-        Linearly interpolate to ``target.time``.
-    kwargs : dict
-        Passed on to :meth:`~monet.monet_accessor.MONETAccessor.remap_nearest`.
+        Point observation data with target coordinates.
+    merge : bool, default True
+        If True, merge interpolated values with the original target data.
+        If False, return only the interpolated values.
+    interp_time : bool, default False
+        If True, linearly interpolate to the times in target.
+    **kwargs : dict
+        Additional arguments passed to remap_nearest.
 
     Returns
     -------
     xarray.Dataset
+        Dataset with interpolated source data at target locations,
+        either merged with original target data (if merge=True) or standalone.
     """
     from ..monet_accessor import _dataset_to_monet
 
@@ -99,6 +102,20 @@ def combine_da_to_da(source, target, *, merge=True, interp_time=False, **kwargs)
 
 
 def _rename_latlon(ds):
+    """Standardize latitude/longitude coordinate names.
+
+    Converts between 'latitude'/'longitude' and 'lat'/'lon' naming conventions.
+
+    Parameters
+    ----------
+    ds : xarray.Dataset
+        Dataset with latitude and longitude coordinates to rename.
+
+    Returns
+    -------
+    xarray.Dataset
+        Dataset with standardized coordinate names.
+    """
     if "latitude" in ds.coords:
         return ds.rename({"latitude": "lat", "longitude": "lon"})
     elif "lat" in ds.coords:
@@ -168,25 +185,23 @@ def combine_da_to_df_xesmf(da, df, *, suffix=None, **kwargs):
 
 
 def combine_da_to_df_xesmf_strat(da, daz, df, **kwargs):
-    """This function will combine an xarray data array with spatial information
-    point observations in `df`.
+    """Combine vertical profile data and surface observations using xESMF.
 
     Parameters
     ----------
     da : xarray.DataArray
         Data to interpolate.
     daz : xarray.DataArray
-        Vertical coordinate data variable.
-        Must have same shape as `da`.
+        Vertical coordinate data array
     df : pandas.DataFrame
-        Point data.
-    kwargs : dict
-        Passed on to :func:`~monet.util.resample.resample_xesmf`
-        (and then to ``xesmf.Regridder``).
+        DataFrame containing surface observations with lat/lon coordinates
+    **kwargs
+        Additional arguments passed to xesmf regridder
 
     Returns
     -------
     pandas.DataFrame
+        Combined data frame with interpolated model values at observation points
     """
     from ..util.interp_util import constant_1d_xesmf
     from ..util.resample import resample_xesmf
@@ -246,12 +261,15 @@ def combine_da_to_height_profile(da, dset, *, radius_of_influence=12e3):
     ----------
     da : xarray.DataArray
     dset : xarray.Dataset
+        Dataset containing vertical profile observations
+    radius_of_influence : float, optional
+        Search radius for nearest neighbor interpolation in meters.
+        Default is 12km.
 
     Returns
     -------
     xarray.Dataset
-        Returns the xarray.Dataset with the `da` added as an additional
-        variable.
+        Combined dataset with interpolated model values at observation heights
     """
     # from ..util.interp_util import nearest_point_swathdefinition
     lon, lat = dset.longitude, dset.latitude
